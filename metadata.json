@@ -1,0 +1,6 @@
+{
+  "name": "VSTEP Speaking Part 1 Simulator",
+  "description": "VSTEP Speaking Part 1 Simulator with Test and Practice modes, British female TTS, bilingual pronunciation guides, and single-file audio download.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
