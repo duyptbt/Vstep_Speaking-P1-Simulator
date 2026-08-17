@@ -1,5 +1,5 @@
 export type AppMode = "instructions" | "test" | "practice" | "results";
-export type AppTheme = "midnight" | "light" | "emerald" | "sunset";
+export type AppTheme = "light" | "ivory" | "nordic" | "midnight" | "emerald" | "sunset";
 
 export interface Question {
   id: string;

@@ -103,20 +103,25 @@ export default function App() {
             questionSet={selectedSet}
             onRetake={() => setCurrentMode("test")}
             onOpenAudioTool={() => setIsAudioToolOpen(true)}
+            currentTheme={currentTheme}
           />
         )}
 
         {/* Fallback Home Banner when in instructions mode */}
         {currentMode === "instructions" && (
           <div className="max-w-4xl mx-auto px-4 py-16 text-center space-y-6">
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-bold uppercase tracking-wider">
+            <div className={`inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
+              theme.category === "light"
+                ? "bg-blue-50 border border-blue-200 text-blue-800"
+                : "bg-indigo-500/10 border border-indigo-500/30 text-indigo-300"
+            }`}>
               VSTEP Speaking Part 1 Simulator
             </div>
-            <h1 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
+            <h1 className={`text-3xl sm:text-5xl font-extrabold tracking-tight ${theme.textPrimary}`}>
               Master VSTEP Speaking Social Interaction
             </h1>
-            <p className="text-slate-400 max-w-xl mx-auto text-sm sm:text-base leading-relaxed">
-              Target B2 Band (6.0 - 8.0) with real-time 3-minute timed tests, bilingual English & Vietnamese guides, female British TTS voice model answers, and combined single-file audio export.
+            <p className={`max-w-xl mx-auto text-sm sm:text-base leading-relaxed ${theme.textMuted}`}>
+              Target B1 (4.0 - 5.5) & B2 Band (6.0 - 8.0) with real-time 3-minute timed tests, bilingual English & Vietnamese guides, adjustable speed British TTS voice model answers, and combined single-file audio export.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
               <button
@@ -133,9 +138,9 @@ export default function App() {
                   setIsInstructionsOpen(false);
                   setCurrentMode("practice");
                 }}
-                className="px-6 py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-sm shadow-xl shadow-indigo-600/30 transition hover:scale-[1.02]"
+                className="px-6 py-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-sm shadow-xl shadow-blue-600/30 transition hover:scale-[1.02]"
               >
-                Enter Practice Mode (Bilingual EN/VI)
+                Enter Practice Mode (B1 & B2 Model Answers)
               </button>
             </div>
           </div>
@@ -154,6 +159,7 @@ export default function App() {
           setIsInstructionsOpen(false);
           setCurrentMode("practice");
         }}
+        currentTheme={currentTheme}
       />
 
       {/* Audio Downloader Tool Modal */}

@@ -13,7 +13,9 @@ import {
   Sparkles,
   FileText,
   Palette,
-  Gauge
+  Gauge,
+  Sun,
+  Moon
 } from "lucide-react";
 
 interface HeaderProps {
@@ -43,10 +45,20 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenAudioTool,
   onShowInstructions
 }) => {
-  const theme = THEMES[currentTheme] || THEMES.midnight;
+  const theme = THEMES[currentTheme] || THEMES.light;
+  const isLight = theme.category === "light";
+
+  // Toggle between default light and dark
+  const handleToggleLightDark = () => {
+    if (isLight) {
+      onSelectTheme("midnight");
+    } else {
+      onSelectTheme("light");
+    }
+  };
 
   return (
-    <header className={`${theme.headerBg} text-white border-b ${theme.headerBorder} sticky top-0 z-40 shadow-md transition-colors duration-200`}>
+    <header className={`${theme.headerBg} ${theme.textPrimary} border-b ${theme.headerBorder} sticky top-0 z-40 shadow-sm transition-colors duration-200`}>
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-4">
           
@@ -58,27 +70,36 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
               <div>
                 <div className="flex items-center space-x-1.5 sm:space-x-2">
-                  <h1 className="text-base sm:text-xl font-extrabold tracking-tight text-white leading-tight">
+                  <h1 className={`text-base sm:text-xl font-extrabold tracking-tight ${theme.textPrimary} leading-tight`}>
                     VSTEP Speaking Part 1
                   </h1>
-                  <span className="px-2 py-0.5 text-[10px] sm:text-xs font-semibold bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 rounded-full flex items-center gap-1 flex-shrink-0">
-                    <Award className="w-3 h-3 text-indigo-400" /> B2 Target
+                  <span className={`px-2 py-0.5 text-[10px] sm:text-xs font-semibold ${isLight ? "bg-blue-100 text-blue-800 border border-blue-200" : "bg-indigo-500/20 border border-indigo-400/30 text-indigo-300"} rounded-full flex items-center gap-1 flex-shrink-0`}>
+                    <Award className="w-3 h-3 text-indigo-500" /> B2 Target
                   </span>
                 </div>
-                <p className="text-[11px] sm:text-xs text-slate-400 truncate max-w-[220px] sm:max-w-none">
+                <p className={`text-[11px] sm:text-xs ${theme.textMuted} truncate max-w-[220px] sm:max-w-none`}>
                   Social Interaction Simulator • British Female Voice
                 </p>
               </div>
             </div>
 
-            {/* Quick Instructions info on mobile */}
-            <button
-              onClick={onShowInstructions}
-              className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800/80 rounded-lg transition md:hidden"
-              title="View Test Instructions"
-            >
-              <Info className="w-5 h-5" />
-            </button>
+            {/* Quick Actions on mobile: Theme Toggle + Instructions */}
+            <div className="flex items-center space-x-1 md:hidden">
+              <button
+                onClick={handleToggleLightDark}
+                className={`p-1.5 rounded-lg transition ${isLight ? "text-slate-600 hover:bg-slate-100" : "text-slate-400 hover:bg-slate-800"}`}
+                title={isLight ? "Switch to Dark Mode" : "Switch to Light Mode"}
+              >
+                {isLight ? <Moon className="w-4 h-4 text-slate-700" /> : <Sun className="w-4 h-4 text-amber-400" />}
+              </button>
+              <button
+                onClick={onShowInstructions}
+                className={`p-1.5 rounded-lg transition ${isLight ? "text-slate-600 hover:bg-slate-100" : "text-slate-400 hover:bg-slate-800"}`}
+                title="View Test Instructions"
+              >
+                <Info className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
           {/* Navigation Controls Bar */}
@@ -90,22 +111,24 @@ export const Header: React.FC<HeaderProps> = ({
                 const setObj = QUESTION_SETS.find((s) => s.id === e.target.value);
                 if (setObj) onSelectSet(setObj);
               }}
-              className="bg-slate-800/90 border border-slate-700/80 text-slate-200 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold cursor-pointer max-w-[140px] sm:max-w-none truncate"
+              className={`${isLight ? "bg-slate-100 border-slate-300 text-slate-800 hover:bg-slate-200/70" : "bg-slate-800/90 border-slate-700/80 text-slate-200"} border text-xs rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold cursor-pointer max-w-[140px] sm:max-w-none truncate transition`}
             >
               {QUESTION_SETS.map((s) => (
-                <option key={s.id} value={s.id}>
+                <option key={s.id} value={s.id} className={isLight ? "bg-white text-slate-900" : "bg-slate-900 text-slate-100"}>
                   {s.title}
                 </option>
               ))}
             </select>
 
             {/* Mode Switcher Tabs */}
-            <div className="flex items-center bg-slate-800/90 p-0.5 sm:p-1 rounded-lg border border-slate-700/80">
+            <div className={`flex items-center p-0.5 sm:p-1 rounded-lg border ${isLight ? "bg-slate-100 border-slate-300" : "bg-slate-800/90 border-slate-700/80"}`}>
               <button
                 onClick={() => onSelectMode("test")}
                 className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-1 ${
                   currentMode === "test"
                     ? "bg-rose-600 text-white shadow-xs"
+                    : isLight
+                    ? "text-slate-700 hover:text-slate-900 hover:bg-slate-200"
                     : "text-slate-300 hover:text-white hover:bg-slate-700/50"
                 }`}
               >
@@ -118,6 +141,8 @@ export const Header: React.FC<HeaderProps> = ({
                 className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-1 ${
                   currentMode === "practice"
                     ? "bg-indigo-600 text-white shadow-xs"
+                    : isLight
+                    ? "text-slate-700 hover:text-slate-900 hover:bg-slate-200"
                     : "text-slate-300 hover:text-white hover:bg-slate-700/50"
                 }`}
               >
@@ -126,37 +151,66 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
             </div>
 
-            {/* Theme Selector Button & Dropdown */}
-            <div className="flex items-center bg-slate-800/90 border border-slate-700/80 text-slate-200 text-xs rounded-lg px-2 py-1 space-x-1">
-              <Palette className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+            {/* Quick Light/Dark Toggle Button */}
+            <button
+              onClick={handleToggleLightDark}
+              className={`p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg border text-xs font-semibold transition flex items-center gap-1.5 ${
+                isLight
+                  ? "bg-slate-100 border-slate-300 text-slate-800 hover:bg-slate-200"
+                  : "bg-slate-800/90 border-slate-700/80 text-slate-200 hover:bg-slate-700"
+              }`}
+              title={isLight ? "Switch to Dark Mode (Midnight)" : "Switch to Light Mode (Academy Light)"}
+            >
+              {isLight ? (
+                <>
+                  <Moon className="w-3.5 h-3.5 text-indigo-600" />
+                  <span className="hidden lg:inline">Dark</span>
+                </>
+              ) : (
+                <>
+                  <Sun className="w-3.5 h-3.5 text-amber-400" />
+                  <span className="hidden lg:inline">Light</span>
+                </>
+              )}
+            </button>
+
+            {/* Theme Selector Dropdown */}
+            <div className={`flex items-center border text-xs rounded-lg px-2 py-1 space-x-1 ${isLight ? "bg-slate-100 border-slate-300 text-slate-800" : "bg-slate-800/90 border-slate-700/80 text-slate-200"}`}>
+              <Palette className={`w-3.5 h-3.5 flex-shrink-0 ${isLight ? "text-blue-600" : "text-amber-400"}`} />
               <select
                 value={currentTheme}
                 onChange={(e) => onSelectTheme(e.target.value as AppTheme)}
-                className="bg-transparent border-none text-slate-200 text-xs focus:outline-none font-semibold cursor-pointer pr-1"
+                className={`bg-transparent border-none text-xs focus:outline-none font-semibold cursor-pointer pr-1 ${isLight ? "text-slate-800" : "text-slate-200"}`}
                 title="Select Visual Theme"
               >
-                <option value="midnight" className="bg-slate-900 text-slate-100">Midnight</option>
-                <option value="light" className="bg-slate-900 text-slate-100">Academy Light</option>
-                <option value="emerald" className="bg-slate-900 text-slate-100">Emerald Zen</option>
-                <option value="sunset" className="bg-slate-900 text-slate-100">Sunset</option>
+                <optgroup label="Light Themes (Nền Sáng)" className={isLight ? "bg-white text-slate-900" : "bg-slate-900 text-slate-100"}>
+                  <option value="light">☀️ Academy Light (Classic)</option>
+                  <option value="ivory">📜 Warm Ivory (Parchment)</option>
+                  <option value="nordic">❄️ Nordic Frost (Clean Ice)</option>
+                </optgroup>
+                <optgroup label="Dark Themes (Nền Tối)" className={isLight ? "bg-white text-slate-900" : "bg-slate-900 text-slate-100"}>
+                  <option value="midnight">🌙 Midnight Dark (Indigo)</option>
+                  <option value="emerald">🌲 Emerald Zen (Forest)</option>
+                  <option value="sunset">🌅 Sunset Twilight (Amber)</option>
+                </optgroup>
               </select>
             </div>
 
             {/* TTS Voice Speed Selector */}
-            <div className="flex items-center bg-slate-800/90 border border-slate-700/80 text-slate-200 text-xs rounded-lg px-2 py-1 space-x-1">
-              <Gauge className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0" />
+            <div className={`flex items-center border text-xs rounded-lg px-2 py-1 space-x-1 ${isLight ? "bg-slate-100 border-slate-300 text-slate-800" : "bg-slate-800/90 border-slate-700/80 text-slate-200"}`}>
+              <Gauge className={`w-3.5 h-3.5 flex-shrink-0 ${isLight ? "text-cyan-600" : "text-cyan-400"}`} />
               <select
                 value={speechRate}
                 onChange={(e) => onSelectSpeechRate(parseFloat(e.target.value))}
-                className="bg-transparent border-none text-slate-200 text-xs focus:outline-none font-semibold cursor-pointer pr-1"
+                className={`bg-transparent border-none text-xs focus:outline-none font-semibold cursor-pointer pr-1 ${isLight ? "text-slate-800" : "text-slate-200"}`}
                 title="Adjust TTS Speech Speed"
               >
-                <option value="0.75" className="bg-slate-900 text-slate-100">0.75x (Slow)</option>
-                <option value="0.85" className="bg-slate-900 text-slate-100">0.85x (Relaxed)</option>
-                <option value="0.95" className="bg-slate-900 text-slate-100">0.95x (Exam Normal)</option>
-                <option value="1.0" className="bg-slate-900 text-slate-100">1.0x (Standard)</option>
-                <option value="1.15" className="bg-slate-900 text-slate-100">1.15x (Brisk)</option>
-                <option value="1.25" className="bg-slate-900 text-slate-100">1.25x (Fast)</option>
+                <option value="0.75" className={isLight ? "bg-white text-slate-900" : "bg-slate-900 text-slate-100"}>0.75x (Slow)</option>
+                <option value="0.85" className={isLight ? "bg-white text-slate-900" : "bg-slate-900 text-slate-100"}>0.85x (Relaxed)</option>
+                <option value="0.95" className={isLight ? "bg-white text-slate-900" : "bg-slate-900 text-slate-100"}>0.95x (Exam Normal)</option>
+                <option value="1.0" className={isLight ? "bg-white text-slate-900" : "bg-slate-900 text-slate-100"}>1.0x (Standard)</option>
+                <option value="1.15" className={isLight ? "bg-white text-slate-900" : "bg-slate-900 text-slate-100"}>1.15x (Brisk)</option>
+                <option value="1.25" className={isLight ? "bg-white text-slate-900" : "bg-slate-900 text-slate-100"}>1.25x (Fast)</option>
               </select>
             </div>
 
@@ -164,25 +218,37 @@ export const Header: React.FC<HeaderProps> = ({
             <div className="flex items-center gap-1.5">
               <button
                 onClick={() => downloadFullQuestionBank(QUESTION_SETS)}
-                className="px-2.5 py-1.5 bg-slate-800/90 hover:bg-slate-700/90 text-slate-200 hover:text-white border border-slate-700/80 rounded-lg text-xs font-medium transition flex items-center gap-1"
+                className={`px-2.5 py-1.5 border rounded-lg text-xs font-medium transition flex items-center gap-1 ${
+                  isLight
+                    ? "bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700 hover:text-slate-900"
+                    : "bg-slate-800/90 hover:bg-slate-700/90 text-slate-200 hover:text-white border-slate-700/80"
+                }`}
                 title="Download full question bank (.txt)"
               >
-                <FileText className="w-3.5 h-3.5 text-blue-400" />
+                <FileText className={`w-3.5 h-3.5 ${isLight ? "text-blue-600" : "text-blue-400"}`} />
                 <span className="hidden sm:inline">Questions</span>
               </button>
 
               <button
                 onClick={onOpenAudioTool}
-                className="px-2.5 py-1.5 bg-slate-800/90 hover:bg-slate-700/90 text-slate-200 hover:text-white border border-slate-700/80 rounded-lg text-xs font-medium transition flex items-center gap-1"
+                className={`px-2.5 py-1.5 border rounded-lg text-xs font-medium transition flex items-center gap-1 ${
+                  isLight
+                    ? "bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700 hover:text-slate-900"
+                    : "bg-slate-800/90 hover:bg-slate-700/90 text-slate-200 hover:text-white border-slate-700/80"
+                }`}
                 title="Audio Downloader Tool"
               >
-                <Download className="w-3.5 h-3.5 text-emerald-400" />
+                <Download className={`w-3.5 h-3.5 ${isLight ? "text-emerald-600" : "text-emerald-400"}`} />
                 <span className="hidden sm:inline">Audio Tool</span>
               </button>
 
               <button
                 onClick={onShowInstructions}
-                className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800/80 rounded-lg transition hidden md:block"
+                className={`p-1.5 rounded-lg transition hidden md:block ${
+                  isLight
+                    ? "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                    : "text-slate-400 hover:text-white hover:bg-slate-800/80"
+                }`}
                 title="View Test Instructions"
               >
                 <Info className="w-4 h-4" />
@@ -192,17 +258,17 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Sub-bar showing TTS Voice & Speed & Theme status */}
-        <div className="mt-2 pt-2 border-t border-slate-800/60 flex flex-wrap items-center justify-between gap-2 text-[11px] sm:text-xs text-slate-400">
+        <div className={`mt-2 pt-2 border-t ${theme.headerBorder} flex flex-wrap items-center justify-between gap-2 text-[11px] sm:text-xs ${theme.textMuted}`}>
           <div className="flex flex-wrap items-center gap-3 sm:gap-4">
             <div className="flex items-center space-x-1.5">
-              <Volume2 className="w-3.5 h-3.5 text-indigo-400" />
+              <Volume2 className={`w-3.5 h-3.5 ${isLight ? "text-blue-600" : "text-indigo-400"}`} />
               <span>
-                Voice: <strong className="text-indigo-300">{ttsVoiceName || "Female British (en-GB)"}</strong>
+                Voice: <strong className={isLight ? "text-blue-700 font-semibold" : "text-indigo-300 font-semibold"}>{ttsVoiceName || "Female British (en-GB)"}</strong>
               </span>
             </div>
 
-            <div className="flex items-center space-x-1.5 bg-slate-800/80 px-2 py-0.5 rounded-md border border-slate-700/60">
-              <Gauge className="w-3 h-3 text-cyan-400" />
+            <div className={`flex items-center space-x-1.5 px-2 py-0.5 rounded-md border ${isLight ? "bg-slate-100 border-slate-300" : "bg-slate-800/80 border-slate-700/60"}`}>
+              <Gauge className={`w-3 h-3 ${isLight ? "text-cyan-700" : "text-cyan-400"}`} />
               <span>Speed:</span>
               <div className="flex items-center space-x-1">
                 {[0.75, 0.95, 1.0, 1.15].map((rate) => (
@@ -212,6 +278,8 @@ export const Header: React.FC<HeaderProps> = ({
                     className={`px-1.5 py-0.5 rounded text-[10px] font-bold transition ${
                       Math.abs(speechRate - rate) < 0.01
                         ? "bg-cyan-600 text-white shadow-xs"
+                        : isLight
+                        ? "text-slate-600 hover:text-slate-900 hover:bg-slate-200"
                         : "text-slate-400 hover:text-slate-200 hover:bg-slate-700/60"
                     }`}
                   >
@@ -223,9 +291,9 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           <div className="flex items-center space-x-3">
-            <span className="hidden sm:flex items-center gap-1 text-slate-400">
-              <Sparkles className="w-3 h-3 text-amber-400" />
-              Theme: <strong className="text-amber-300 capitalize">{theme.name}</strong>
+            <span className={`hidden sm:flex items-center gap-1 ${theme.textMuted}`}>
+              <Sparkles className="w-3 h-3 text-amber-500" />
+              Theme: <strong className={`${isLight ? "text-amber-700" : "text-amber-300"} capitalize`}>{theme.name}</strong>
             </span>
             <span className="hidden sm:inline">•</span>
             <span>1-Click Export (.txt + .wav)</span>
@@ -235,3 +303,4 @@ export const Header: React.FC<HeaderProps> = ({
     </header>
   );
 };
+

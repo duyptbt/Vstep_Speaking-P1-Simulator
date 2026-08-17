@@ -23,8 +23,9 @@ interface TestModeViewProps {
   currentTheme?: AppTheme;
 }
 
-export const TestModeView: React.FC<TestModeViewProps> = ({ questionSet, onFinishTest, currentTheme = "midnight" }) => {
-  const theme = THEMES[currentTheme] || THEMES.midnight;
+export const TestModeView: React.FC<TestModeViewProps> = ({ questionSet, onFinishTest, currentTheme = "light" }) => {
+  const theme = THEMES[currentTheme] || THEMES.light;
+  const isLight = theme.category === "light";
   const [testState, setTestState] = useState<"idle" | "testing" | "paused" | "finished">("idle");
   const [timeLeftSeconds, setTimeLeftSeconds] = useState<number>(180); // 3 minutes = 180s
   const [activeQuestionIndex, setActiveQuestionIndex] = useState<number>(0);
@@ -224,8 +225,8 @@ export const TestModeView: React.FC<TestModeViewProps> = ({ questionSet, onFinis
   // Calculate timer color based on remaining time
   const getTimerColorClass = () => {
     if (timeLeftSeconds <= 30) return "text-rose-500 bg-rose-500/10 border-rose-500/30 animate-pulse";
-    if (timeLeftSeconds <= 60) return "text-amber-400 bg-amber-500/10 border-amber-500/30";
-    return "text-indigo-300 bg-indigo-500/10 border-indigo-500/30";
+    if (timeLeftSeconds <= 60) return "text-amber-500 bg-amber-500/10 border-amber-500/30";
+    return isLight ? "text-blue-700 bg-blue-50 border-blue-200" : "text-indigo-300 bg-indigo-500/10 border-indigo-500/30";
   };
 
   const currentQuestion = allQuestions[activeQuestionIndex];
@@ -234,32 +235,32 @@ export const TestModeView: React.FC<TestModeViewProps> = ({ questionSet, onFinis
     <div className="max-w-5xl mx-auto px-4 py-8">
       {/* Start Banner / Status Card */}
       {testState === "idle" && (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-10 text-center shadow-xl relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-rose-500 via-indigo-500 to-purple-500" />
+        <div className={`${theme.cardBg} border ${theme.cardBorder} rounded-2xl p-6 sm:p-10 text-center shadow-md relative overflow-hidden`}>
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-rose-500 via-blue-500 to-indigo-500" />
 
-          <div className="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center mx-auto mb-5 shadow-inner">
+          <div className="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-500 flex items-center justify-center mx-auto mb-5 shadow-inner">
             <Mic className="w-8 h-8" />
           </div>
 
-          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">VSTEP Speaking Part 1 Simulator</h2>
-          <p className="text-sm text-slate-400 max-w-xl mx-auto mb-6">
+          <h2 className={`text-2xl sm:text-3xl font-bold ${theme.textPrimary} mb-2`}>VSTEP Speaking Part 1 Simulator</h2>
+          <p className={`text-sm ${theme.textMuted} max-w-xl mx-auto mb-6`}>
             You will be asked 6 questions across 2 topics (<strong>{questionSet.topics[0].title}</strong> & <strong>{questionSet.topics[1].title}</strong>).
             You have 3 minutes to answer all questions.
           </p>
 
           {errorMessage && (
-            <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-300 text-xs sm:text-sm flex items-center gap-2 max-w-lg mx-auto">
-              <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+            <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-600 text-xs sm:text-sm flex items-center gap-2 max-w-lg mx-auto">
+              <AlertTriangle className="w-5 h-5 flex-shrink-0 text-rose-500" />
               <span>{errorMessage}</span>
             </div>
           )}
 
-          <div className="bg-slate-800/60 border border-slate-700/80 rounded-xl p-5 max-w-lg mx-auto mb-8 text-left space-y-3">
-            <div className="flex items-center gap-2 text-indigo-300 font-semibold text-xs sm:text-sm uppercase tracking-wider">
-              <Sparkles className="w-4 h-4 text-indigo-400" />
+          <div className={`${theme.subCardBg} border ${theme.subCardBorder} rounded-xl p-5 max-w-lg mx-auto mb-8 text-left space-y-3`}>
+            <div className="flex items-center gap-2 text-blue-600 font-semibold text-xs sm:text-sm uppercase tracking-wider">
+              <Sparkles className="w-4 h-4 text-blue-600" />
               Test Mode Checklist
             </div>
-            <div className="text-xs sm:text-sm text-slate-300 space-y-2">
+            <div className={`text-xs sm:text-sm ${theme.textSecondary} space-y-2`}>
               <p>• <strong>Timer:</strong> Exactly 3:00 countdown timer starts on click.</p>
               <p>• <strong>Audio:</strong> All your answers will be recorded into ONE combined audio file.</p>
               <p>• <strong>Voice:</strong> Female British voice reads questions automatically.</p>
@@ -280,27 +281,27 @@ export const TestModeView: React.FC<TestModeViewProps> = ({ questionSet, onFinis
       {testState === "testing" && (
         <div className="space-y-6">
           {/* Top Status Bar: Timer & Mic Meter */}
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className={`${theme.cardBg} border ${theme.cardBorder} rounded-2xl p-4 sm:p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4`}>
             {/* Timer Display */}
             <div className="flex items-center space-x-3">
               <div className={`px-4 py-2 rounded-xl border font-mono text-2xl font-bold flex items-center gap-2.5 ${getTimerColorClass()}`}>
                 <Clock className="w-6 h-6" />
                 <span>{formatTime(timeLeftSeconds)}</span>
               </div>
-              <div className="text-xs text-slate-400">
-                <p className="font-semibold text-slate-200">Time Remaining</p>
+              <div className={`text-xs ${theme.textMuted}`}>
+                <p className={`font-semibold ${theme.textPrimary}`}>Time Remaining</p>
                 <p>Total time: 3:00</p>
               </div>
             </div>
 
             {/* Mic Meter & Active Audio Bar */}
-            <div className="flex items-center space-x-4 bg-slate-800/80 border border-slate-700 px-4 py-2.5 rounded-xl w-full sm:w-auto">
+            <div className={`flex items-center space-x-4 px-4 py-2.5 rounded-xl w-full sm:w-auto border ${isLight ? "bg-slate-50 border-slate-200" : "bg-slate-800/80 border-slate-700"}`}>
               <div className="flex items-center space-x-2">
                 <span className="relative flex h-3 w-3">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-500"></span>
                 </span>
-                <span className="text-xs font-semibold text-rose-300">Recording Live</span>
+                <span className="text-xs font-semibold text-rose-500">Recording Live</span>
               </div>
 
               {/* Dynamic Visual Audio Levels */}
@@ -310,7 +311,7 @@ export const TestModeView: React.FC<TestModeViewProps> = ({ questionSet, onFinis
                   return (
                     <div
                       key={i}
-                      className="w-2 rounded-t bg-indigo-500 transition-all duration-75"
+                      className="w-2 rounded-t bg-blue-600 transition-all duration-75"
                       style={{ height: `${barHeight}%` }}
                     />
                   );
@@ -329,23 +330,23 @@ export const TestModeView: React.FC<TestModeViewProps> = ({ questionSet, onFinis
           </div>
 
           {/* Time Progress Bar */}
-          <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden border border-slate-700">
+          <div className={`w-full rounded-full h-2 overflow-hidden border ${isLight ? "bg-slate-200 border-slate-300" : "bg-slate-800 border-slate-700"}`}>
             <div
-              className="bg-gradient-to-r from-indigo-500 via-rose-500 to-amber-500 h-2 transition-all duration-1000"
+              className="bg-gradient-to-r from-blue-500 via-rose-500 to-amber-500 h-2 transition-all duration-1000"
               style={{ width: `${(timeLeftSeconds / 180) * 100}%` }}
             />
           </div>
 
           {/* All 6 Questions Grid with Active Focus */}
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-6">
+          <div className={`${theme.cardBg} border ${theme.cardBorder} rounded-2xl p-6 shadow-sm`}>
+            <div className={`flex items-center justify-between pb-4 border-b ${theme.cardBorder} mb-6`}>
               <div>
-                <span className="text-xs uppercase tracking-wider font-semibold text-indigo-400">
+                <span className="text-xs uppercase tracking-wider font-semibold text-blue-600">
                   {questionSet.title}
                 </span>
-                <h3 className="text-lg font-bold text-white">Questions on Screen (Part 1)</h3>
+                <h3 className={`text-lg font-bold ${theme.textPrimary}`}>Questions on Screen (Part 1)</h3>
               </div>
-              <span className="text-xs text-slate-400 bg-slate-800 px-3 py-1 rounded-full border border-slate-700">
+              <span className={`text-xs px-3 py-1 rounded-full border ${isLight ? "bg-slate-100 border-slate-300 text-slate-700" : "bg-slate-800 border-slate-700 text-slate-300"}`}>
                 Question {activeQuestionIndex + 1} of 6
               </span>
             </div>
@@ -362,11 +363,11 @@ export const TestModeView: React.FC<TestModeViewProps> = ({ questionSet, onFinis
                     {/* Topic Header Divider */}
                     {isTopicHeader && (
                       <div className="pt-2 pb-1 flex items-center space-x-2">
-                        <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
-                        <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-300">
+                        <span className="w-2.5 h-2.5 rounded-full bg-blue-600" />
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-blue-600">
                           Topic {idx === 0 ? "1" : "2"}: {topicObj.title}
                         </h4>
-                        <div className="flex-1 border-t border-slate-800" />
+                        <div className={`flex-1 border-t ${theme.cardBorder}`} />
                       </div>
                     )}
 
@@ -378,8 +379,12 @@ export const TestModeView: React.FC<TestModeViewProps> = ({ questionSet, onFinis
                       }}
                       className={`p-4 rounded-xl border transition-all cursor-pointer ${
                         isCurrent
-                          ? "bg-slate-800/90 border-indigo-500/80 ring-2 ring-indigo-500/30 shadow-lg"
-                          : "bg-slate-800/40 border-slate-700/60 hover:bg-slate-800/60"
+                          ? isLight
+                            ? "bg-blue-50/70 border-blue-400 ring-2 ring-blue-400/30 shadow-sm"
+                            : "bg-slate-800/90 border-indigo-500/80 ring-2 ring-indigo-500/30 shadow-lg"
+                          : isLight
+                            ? "bg-slate-50/50 border-slate-200 hover:bg-slate-100/70"
+                            : "bg-slate-800/40 border-slate-700/60 hover:bg-slate-800/60"
                       }`}
                     >
                       <div className="flex items-start justify-between gap-3">
@@ -387,19 +392,19 @@ export const TestModeView: React.FC<TestModeViewProps> = ({ questionSet, onFinis
                           <span
                             className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs flex-shrink-0 ${
                               isCurrent
-                                ? "bg-indigo-600 text-white"
-                                : "bg-slate-700 text-slate-300"
+                                ? "bg-blue-600 text-white"
+                                : isLight ? "bg-slate-200 text-slate-700" : "bg-slate-700 text-slate-300"
                             }`}
                           >
                             Q{idx + 1}
                           </span>
                           <div className="flex-1 min-w-0">
-                            <p className={`text-sm sm:text-base font-semibold leading-snug break-words ${isCurrent ? "text-white" : "text-slate-200"}`}>
+                            <p className={`text-sm sm:text-base font-semibold leading-snug break-words ${isCurrent ? theme.textPrimary : theme.textSecondary}`}>
                               {q.text}
                             </p>
                             {isCurrent && (
-                              <p className="text-xs text-indigo-300 mt-1 flex items-center gap-1">
-                                <Mic className="w-3 h-3 animate-pulse text-rose-400" />
+                              <p className="text-xs text-blue-600 mt-1 flex items-center gap-1">
+                                <Mic className="w-3 h-3 animate-pulse text-rose-500" />
                                 Speak your response clearly now...
                               </p>
                             )}
@@ -411,7 +416,11 @@ export const TestModeView: React.FC<TestModeViewProps> = ({ questionSet, onFinis
                             e.stopPropagation();
                             speakText(q.text);
                           }}
-                          className="p-2 text-slate-400 hover:text-indigo-400 rounded-lg hover:bg-slate-700/50 transition flex-shrink-0"
+                          className={`p-2 rounded-lg transition flex-shrink-0 ${
+                            isLight
+                              ? "text-slate-500 hover:text-blue-600 hover:bg-slate-200"
+                              : "text-slate-400 hover:text-indigo-400 hover:bg-slate-700/50"
+                          }`}
                           title="Listen with British Female Voice"
                         >
                           <Volume2 className="w-4 h-4" />
@@ -424,19 +433,23 @@ export const TestModeView: React.FC<TestModeViewProps> = ({ questionSet, onFinis
             </div>
 
             {/* Active Speech Transcript Box */}
-            <div className="mt-6 pt-5 border-t border-slate-800">
+            <div className={`mt-6 pt-5 border-t ${theme.cardBorder}`}>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <Mic className="w-3.5 h-3.5 text-indigo-400" />
+                <span className={`text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5 ${theme.textMuted}`}>
+                  <Mic className="w-3.5 h-3.5 text-blue-600" />
                   Live Speech Transcript Preview
                 </span>
-                <span className="text-[10px] text-slate-500">Auto-captured via Microphone</span>
+                <span className={`text-[10px] ${theme.textMuted}`}>Auto-captured via Microphone</span>
               </div>
-              <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-4 min-h-[70px] text-xs sm:text-sm text-slate-300 font-mono leading-relaxed">
+              <div className={`border rounded-xl p-4 min-h-[70px] text-xs sm:text-sm font-mono leading-relaxed ${
+                isLight
+                  ? "bg-white border-slate-200 text-slate-800"
+                  : "bg-slate-950/80 border-slate-800 text-slate-300"
+              }`}>
                 {liveTranscript ? (
                   <span>{liveTranscript}</span>
                 ) : (
-                  <span className="text-slate-500 italic">
+                  <span className={`${theme.textMuted} italic`}>
                     Listening for your voice... Speak into your microphone now to answer the questions.
                   </span>
                 )}
@@ -449,7 +462,11 @@ export const TestModeView: React.FC<TestModeViewProps> = ({ questionSet, onFinis
                 <button
                   onClick={() => setActiveQuestionIndex((prev) => Math.max(0, prev - 1))}
                   disabled={activeQuestionIndex === 0}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-slate-200 rounded-lg text-xs font-semibold transition"
+                  className={`px-4 py-2 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg text-xs font-semibold transition border ${
+                    isLight
+                      ? "bg-white hover:bg-slate-100 text-slate-700 border-slate-300"
+                      : "bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700"
+                  }`}
                 >
                   Previous Question
                 </button>
@@ -462,7 +479,7 @@ export const TestModeView: React.FC<TestModeViewProps> = ({ questionSet, onFinis
                     }
                   }}
                   disabled={activeQuestionIndex === 5}
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-lg text-xs font-semibold transition flex items-center gap-1"
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-lg text-xs font-semibold transition flex items-center gap-1"
                 >
                   <span>Next Question</span>
                   <ChevronRight className="w-3.5 h-3.5" />
@@ -471,7 +488,7 @@ export const TestModeView: React.FC<TestModeViewProps> = ({ questionSet, onFinis
 
               <button
                 onClick={completeTestSession}
-                className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-xs sm:text-sm shadow-lg transition flex items-center gap-2"
+                className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-xs sm:text-sm shadow-md transition flex items-center gap-2"
               >
                 <CheckCircle2 className="w-4 h-4" />
                 <span>Submit & View Session Summary</span>
