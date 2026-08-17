@@ -107,6 +107,20 @@ export function setCustomTTSVoice(voice: SpeechSynthesisVoice) {
   selectedVoice = voice;
 }
 
+/**
+ * Preprocesses text before sending to SpeechSynthesis
+ * Replaces acronyms like "VSTEP" with phonetic spelling "Vee-step" [vi: step]
+ */
+export function preprocessTextForTTS(text: string): string {
+  if (!text) return "";
+  return text
+    // Ensure VSTEP is pronounced phonetically as [vi: step] ("Vee-step")
+    .replace(/\bVSTEP\b/gi, "Vee-step")
+    // Clean up excessive punctuation or markdown tags if any
+    .replace(/\*+/g, "")
+    .trim();
+}
+
 export function speakText(
   text: string,
   options?: {
@@ -126,7 +140,8 @@ export function speakText(
   // Cancel any ongoing speech
   stopSpeaking();
 
-  const utterance = new SpeechSynthesisUtterance(text);
+  const formattedText = preprocessTextForTTS(text);
+  const utterance = new SpeechSynthesisUtterance(formattedText);
   currentUtterance = utterance;
 
   const voice = getSelectedTTSVoice();

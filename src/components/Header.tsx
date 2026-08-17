@@ -78,7 +78,7 @@ export const Header: React.FC<HeaderProps> = ({
                   </span>
                 </div>
                 <p className={`text-[11px] sm:text-xs ${theme.textMuted} truncate max-w-[220px] sm:max-w-none`}>
-                  Social Interaction Simulator • British Female Voice
+                  VSTEP [viː step] • Social Interaction Simulator • British Voice
                 </p>
               </div>
             </div>

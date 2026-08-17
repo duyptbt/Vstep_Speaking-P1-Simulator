@@ -42,7 +42,9 @@ export const InstructionsModal: React.FC<InstructionsModalProps> = ({
           </div>
           <div>
             <h2 className={`text-xl sm:text-2xl font-bold ${theme.textPrimary}`}>VSTEP Speaking Part 1 Instructions</h2>
-            <p className={`text-xs sm:text-sm ${theme.textMuted}`}>Social Interaction Section • Target Band B2 (6.0 - 8.0)</p>
+            <p className={`text-xs sm:text-sm ${theme.textMuted}`}>
+              <strong>VSTEP</strong> /viː stɛp/ ("Vee-step") • Social Interaction Section • Target Band B2 (6.0 - 8.0)
+            </p>
           </div>
         </div>
 
