@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { QuestionSet, Question, RecordingChunk, TestResult, AppTheme } from "../types";
-import { speakText, stopSpeaking } from "../utils/tts";
+import { speakText, stopSpeaking, getCurrentProfile, getSelectedTTSVoice } from "../utils/tts";
 import { SpeechToTextEngine } from "../utils/audio";
 import { THEMES } from "../utils/theme";
 import {
@@ -224,9 +224,10 @@ export const PracticeModeView: React.FC<PracticeModeViewProps> = ({
                       ? "bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-800"
                       : "bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700"
                   }`}
+                  title="Listen to question spoken by the selected TTS voice"
                 >
                   <Volume2 className="w-4 h-4 text-blue-600" />
-                  <span>Listen Question (British Voice)</span>
+                  <span>Listen Question ({getCurrentProfile().flag} {getCurrentProfile().gender})</span>
                 </button>
               </div>
 

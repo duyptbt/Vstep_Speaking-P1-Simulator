@@ -1,8 +1,9 @@
 import React from "react";
-import { AppMode, QuestionSet, AppTheme } from "../types";
+import { AppMode, QuestionSet, AppTheme, TTSPresetId } from "../types";
 import { QUESTION_SETS } from "../data/questionSets";
 import { downloadFullQuestionBank } from "../utils/export";
 import { THEMES } from "../utils/theme";
+import { TTS_VOICE_PROFILES } from "../utils/tts";
 import {
   Mic,
   BookOpen,
@@ -15,7 +16,8 @@ import {
   Palette,
   Gauge,
   Sun,
-  Moon
+  Moon,
+  Sliders
 } from "lucide-react";
 
 interface HeaderProps {
@@ -26,9 +28,12 @@ interface HeaderProps {
   currentTheme: AppTheme;
   onSelectTheme: (theme: AppTheme) => void;
   ttsVoiceName?: string;
+  currentPresetId?: TTSPresetId;
+  onSelectVoicePreset?: (presetId: TTSPresetId) => void;
   speechRate: number;
   onSelectSpeechRate: (rate: number) => void;
   onOpenAudioTool: () => void;
+  onOpenVoiceSettings: () => void;
   onShowInstructions: () => void;
 }
 
@@ -40,9 +45,12 @@ export const Header: React.FC<HeaderProps> = ({
   currentTheme,
   onSelectTheme,
   ttsVoiceName,
+  currentPresetId = "en-GB-female",
+  onSelectVoicePreset,
   speechRate,
   onSelectSpeechRate,
   onOpenAudioTool,
+  onOpenVoiceSettings,
   onShowInstructions
 }) => {
   const theme = THEMES[currentTheme] || THEMES.light;
@@ -78,13 +86,20 @@ export const Header: React.FC<HeaderProps> = ({
                   </span>
                 </div>
                 <p className={`text-[11px] sm:text-xs ${theme.textMuted} truncate max-w-[220px] sm:max-w-none`}>
-                  VSTEP [viː step] • Social Interaction Simulator • British Voice
+                  VSTEP [viː step] • Social Interaction Simulator • Multi-Accent Voices
                 </p>
               </div>
             </div>
 
-            {/* Quick Actions on mobile: Theme Toggle + Instructions */}
+            {/* Quick Actions on mobile: Theme Toggle + Voice + Instructions */}
             <div className="flex items-center space-x-1 md:hidden">
+              <button
+                onClick={onOpenVoiceSettings}
+                className={`p-1.5 rounded-lg transition ${isLight ? "text-slate-600 hover:bg-slate-100" : "text-slate-400 hover:bg-slate-800"}`}
+                title="Open Voice Settings"
+              >
+                <Volume2 className="w-4 h-4 text-blue-600" />
+              </button>
               <button
                 onClick={handleToggleLightDark}
                 className={`p-1.5 rounded-lg transition ${isLight ? "text-slate-600 hover:bg-slate-100" : "text-slate-400 hover:bg-slate-800"}`}
@@ -151,6 +166,67 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
             </div>
 
+            {/* TTS Voice Accent Selector */}
+            <div className={`flex items-center border text-xs rounded-lg px-2 py-1 space-x-1 ${isLight ? "bg-slate-100 border-slate-300 text-slate-800" : "bg-slate-800/90 border-slate-700/80 text-slate-200"}`}>
+              <Volume2 className={`w-3.5 h-3.5 flex-shrink-0 ${isLight ? "text-indigo-600" : "text-indigo-400"}`} />
+              <select
+                value={currentPresetId}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === "modal") {
+                    onOpenVoiceSettings();
+                  } else if (onSelectVoicePreset) {
+                    onSelectVoicePreset(val as TTSPresetId);
+                  }
+                }}
+                className={`bg-transparent border-none text-xs focus:outline-none font-semibold cursor-pointer pr-1 max-w-[130px] sm:max-w-[150px] truncate ${isLight ? "text-slate-800" : "text-slate-200"}`}
+                title="Select TTS Voice Accent & Gender"
+              >
+                <optgroup label="British Accents (UK)" className={isLight ? "bg-white text-slate-900" : "bg-slate-900 text-slate-100"}>
+                  <option value="en-GB-female">🇬🇧 British Female (RP)</option>
+                  <option value="en-GB-male">🇬🇧 British Male (Oxford)</option>
+                </optgroup>
+                <optgroup label="American Accents (US)" className={isLight ? "bg-white text-slate-900" : "bg-slate-900 text-slate-100"}>
+                  <option value="en-US-female">🇺🇸 American Female</option>
+                  <option value="en-US-male">🇺🇸 American Male</option>
+                </optgroup>
+                <optgroup label="Global English Accents" className={isLight ? "bg-white text-slate-900" : "bg-slate-900 text-slate-100"}>
+                  <option value="en-AU-female">🇦🇺 Australian Female</option>
+                  <option value="en-AU-male">🇦🇺 Australian Male</option>
+                  <option value="en-IE">🇮🇪 Irish English</option>
+                  <option value="en-SCOTTISH">🏴󠁧󠁢󠁳󠁣󠁴󠁿 Scottish English</option>
+                </optgroup>
+                <option value="modal" className={isLight ? "bg-white text-blue-700 font-bold" : "bg-slate-900 text-blue-300 font-bold"}>
+                  ⚙️ Voice Studio & All Voices...
+                </option>
+              </select>
+              <button
+                onClick={onOpenVoiceSettings}
+                className={`p-1 rounded hover:bg-slate-200/60 transition ${isLight ? "text-slate-600" : "text-slate-300"}`}
+                title="Configure voice pitch, custom voice, and test preview"
+              >
+                <Sliders className="w-3 h-3" />
+              </button>
+            </div>
+
+            {/* TTS Voice Speed Selector */}
+            <div className={`flex items-center border text-xs rounded-lg px-2 py-1 space-x-1 ${isLight ? "bg-slate-100 border-slate-300 text-slate-800" : "bg-slate-800/90 border-slate-700/80 text-slate-200"}`}>
+              <Gauge className={`w-3.5 h-3.5 flex-shrink-0 ${isLight ? "text-cyan-600" : "text-cyan-400"}`} />
+              <select
+                value={speechRate}
+                onChange={(e) => onSelectSpeechRate(parseFloat(e.target.value))}
+                className={`bg-transparent border-none text-xs focus:outline-none font-semibold cursor-pointer pr-1 ${isLight ? "text-slate-800" : "text-slate-200"}`}
+                title="Adjust TTS Speech Speed"
+              >
+                <option value="0.75" className={isLight ? "bg-white text-slate-900" : "bg-slate-900 text-slate-100"}>0.75x (Slow)</option>
+                <option value="0.85" className={isLight ? "bg-white text-slate-900" : "bg-slate-900 text-slate-100"}>0.85x (Relaxed)</option>
+                <option value="0.95" className={isLight ? "bg-white text-slate-900" : "bg-slate-900 text-slate-100"}>0.95x (Exam Normal)</option>
+                <option value="1.0" className={isLight ? "bg-white text-slate-900" : "bg-slate-900 text-slate-100"}>1.0x (Standard)</option>
+                <option value="1.15" className={isLight ? "bg-white text-slate-900" : "bg-slate-900 text-slate-100"}>1.15x (Brisk)</option>
+                <option value="1.25" className={isLight ? "bg-white text-slate-900" : "bg-slate-900 text-slate-100"}>1.25x (Fast)</option>
+              </select>
+            </div>
+
             {/* Quick Light/Dark Toggle Button */}
             <button
               onClick={handleToggleLightDark}
@@ -193,24 +269,6 @@ export const Header: React.FC<HeaderProps> = ({
                   <option value="emerald">🌲 Emerald Zen (Forest)</option>
                   <option value="sunset">🌅 Sunset Twilight (Amber)</option>
                 </optgroup>
-              </select>
-            </div>
-
-            {/* TTS Voice Speed Selector */}
-            <div className={`flex items-center border text-xs rounded-lg px-2 py-1 space-x-1 ${isLight ? "bg-slate-100 border-slate-300 text-slate-800" : "bg-slate-800/90 border-slate-700/80 text-slate-200"}`}>
-              <Gauge className={`w-3.5 h-3.5 flex-shrink-0 ${isLight ? "text-cyan-600" : "text-cyan-400"}`} />
-              <select
-                value={speechRate}
-                onChange={(e) => onSelectSpeechRate(parseFloat(e.target.value))}
-                className={`bg-transparent border-none text-xs focus:outline-none font-semibold cursor-pointer pr-1 ${isLight ? "text-slate-800" : "text-slate-200"}`}
-                title="Adjust TTS Speech Speed"
-              >
-                <option value="0.75" className={isLight ? "bg-white text-slate-900" : "bg-slate-900 text-slate-100"}>0.75x (Slow)</option>
-                <option value="0.85" className={isLight ? "bg-white text-slate-900" : "bg-slate-900 text-slate-100"}>0.85x (Relaxed)</option>
-                <option value="0.95" className={isLight ? "bg-white text-slate-900" : "bg-slate-900 text-slate-100"}>0.95x (Exam Normal)</option>
-                <option value="1.0" className={isLight ? "bg-white text-slate-900" : "bg-slate-900 text-slate-100"}>1.0x (Standard)</option>
-                <option value="1.15" className={isLight ? "bg-white text-slate-900" : "bg-slate-900 text-slate-100"}>1.15x (Brisk)</option>
-                <option value="1.25" className={isLight ? "bg-white text-slate-900" : "bg-slate-900 text-slate-100"}>1.25x (Fast)</option>
               </select>
             </div>
 
@@ -260,12 +318,21 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Sub-bar showing TTS Voice & Speed & Theme status */}
         <div className={`mt-2 pt-2 border-t ${theme.headerBorder} flex flex-wrap items-center justify-between gap-2 text-[11px] sm:text-xs ${theme.textMuted}`}>
           <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-            <div className="flex items-center space-x-1.5">
-              <Volume2 className={`w-3.5 h-3.5 ${isLight ? "text-blue-600" : "text-indigo-400"}`} />
+            <button
+              onClick={onOpenVoiceSettings}
+              className={`flex items-center space-x-1.5 hover:underline cursor-pointer group`}
+              title="Click to open TTS Voice Studio"
+            >
+              <Volume2 className={`w-3.5 h-3.5 ${isLight ? "text-indigo-600" : "text-indigo-400"}`} />
               <span>
-                Voice: <strong className={isLight ? "text-blue-700 font-semibold" : "text-indigo-300 font-semibold"}>{ttsVoiceName || "Female British (en-GB)"}</strong>
+                Active Voice: <strong className={isLight ? "text-indigo-700 font-bold group-hover:text-indigo-900" : "text-indigo-300 font-bold group-hover:text-indigo-100"}>
+                  {ttsVoiceName || "British Female (UK RP)"}
+                </strong>
               </span>
-            </div>
+              <span className={`text-[10px] px-1.5 py-0.2 rounded font-semibold border ${isLight ? "bg-indigo-50 border-indigo-200 text-indigo-700" : "bg-indigo-950/40 border-indigo-700/40 text-indigo-300"}`}>
+                Change ▾
+              </span>
+            </button>
 
             <div className={`flex items-center space-x-1.5 px-2 py-0.5 rounded-md border ${isLight ? "bg-slate-100 border-slate-300" : "bg-slate-800/80 border-slate-700/60"}`}>
               <Gauge className={`w-3 h-3 ${isLight ? "text-cyan-700" : "text-cyan-400"}`} />

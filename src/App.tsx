@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { AppMode, QuestionSet, TestResult, AppTheme } from "./types";
+import { AppMode, QuestionSet, TestResult, AppTheme, TTSPresetId } from "./types";
 import { QUESTION_SETS } from "./data/questionSets";
-import { initializeTTSVoices, getSelectedTTSVoice, getSpeechRate, setSpeechRate } from "./utils/tts";
+import {
+  initializeTTSVoices,
+  getSelectedTTSVoice,
+  getSpeechRate,
+  setSpeechRate,
+  getCurrentPresetId,
+  setVoicePreset,
+  getCurrentProfile
+} from "./utils/tts";
 import { THEMES } from "./utils/theme";
 import { Header } from "./components/Header";
 import { InstructionsModal } from "./components/InstructionsModal";
@@ -9,6 +17,7 @@ import { TestModeView } from "./components/TestModeView";
 import { PracticeModeView } from "./components/PracticeModeView";
 import { ResultsView } from "./components/ResultsView";
 import { AudioMergerModal } from "./components/AudioMergerModal";
+import { VoiceSettingsModal } from "./components/VoiceSettingsModal";
 
 export default function App() {
   const [currentMode, setCurrentMode] = useState<AppMode>("instructions");
@@ -17,23 +26,39 @@ export default function App() {
   const [testResult, setTestResult] = useState<TestResult | null>(null);
   const [isInstructionsOpen, setIsInstructionsOpen] = useState<boolean>(true);
   const [isAudioToolOpen, setIsAudioToolOpen] = useState<boolean>(false);
-  const [voiceName, setVoiceName] = useState<string>("Female British (en-GB)");
+  const [isVoiceSettingsOpen, setIsVoiceSettingsOpen] = useState<boolean>(false);
+  const [currentPresetId, setCurrentPresetId] = useState<TTSPresetId>(getCurrentPresetId());
+  const [voiceName, setVoiceName] = useState<string>("British Female (UK RP)");
   const [speechRate, setSpeechRateState] = useState<number>(getSpeechRate());
 
   const theme = THEMES[currentTheme] || THEMES.midnight;
+
+  const refreshActiveVoiceDisplay = () => {
+    const profile = getCurrentProfile();
+    const selected = getSelectedTTSVoice();
+    if (profile && profile.id !== "custom") {
+      setVoiceName(`${profile.flag} ${profile.label}`);
+    } else if (selected) {
+      setVoiceName(`Custom: ${selected.name}`);
+    }
+    setCurrentPresetId(getCurrentPresetId());
+  };
 
   const handleSelectSpeechRate = (rate: number) => {
     setSpeechRate(rate);
     setSpeechRateState(rate);
   };
 
+  const handleSelectVoicePreset = (presetId: TTSPresetId) => {
+    setVoicePreset(presetId);
+    setCurrentPresetId(presetId);
+    refreshActiveVoiceDisplay();
+  };
+
   // Initialize Speech Synthesis Voices
   useEffect(() => {
-    initializeTTSVoices((voices) => {
-      const selected = getSelectedTTSVoice();
-      if (selected) {
-        setVoiceName(selected.name);
-      }
+    initializeTTSVoices(() => {
+      refreshActiveVoiceDisplay();
     });
   }, []);
 
@@ -73,9 +98,12 @@ export default function App() {
         currentTheme={currentTheme}
         onSelectTheme={setCurrentTheme}
         ttsVoiceName={voiceName}
+        currentPresetId={currentPresetId}
+        onSelectVoicePreset={handleSelectVoicePreset}
         speechRate={speechRate}
         onSelectSpeechRate={handleSelectSpeechRate}
         onOpenAudioTool={() => setIsAudioToolOpen(true)}
+        onOpenVoiceSettings={() => setIsVoiceSettingsOpen(true)}
         onShowInstructions={() => setIsInstructionsOpen(true)}
       />
 
@@ -121,7 +149,7 @@ export default function App() {
               Master VSTEP Speaking Social Interaction
             </h1>
             <p className={`max-w-xl mx-auto text-sm sm:text-base leading-relaxed ${theme.textMuted}`}>
-              Target B1 (4.0 - 5.5) & B2 Band (6.0 - 8.0) with real-time 3-minute timed tests, bilingual English & Vietnamese guides, adjustable speed British TTS voice model answers, and combined single-file audio export.
+              Target B1 (4.0 - 5.5) & B2 Band (6.0 - 8.0) with real-time 3-minute timed tests, bilingual English & Vietnamese guides, multi-accent British & American TTS voices, and combined single-file audio export.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
               <button
@@ -160,6 +188,17 @@ export default function App() {
           setCurrentMode("practice");
         }}
         currentTheme={currentTheme}
+      />
+
+      {/* Voice Settings Studio Modal */}
+      <VoiceSettingsModal
+        isOpen={isVoiceSettingsOpen}
+        onClose={() => {
+          setIsVoiceSettingsOpen(false);
+          refreshActiveVoiceDisplay();
+        }}
+        currentTheme={currentTheme}
+        onVoiceChanged={refreshActiveVoiceDisplay}
       />
 
       {/* Audio Downloader Tool Modal */}

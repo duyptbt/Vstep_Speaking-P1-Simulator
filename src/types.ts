@@ -1,6 +1,29 @@
 export type AppMode = "instructions" | "test" | "practice" | "results";
 export type AppTheme = "light" | "ivory" | "nordic" | "midnight" | "emerald" | "sunset";
 
+export type TTSPresetId =
+  | "en-GB-female"
+  | "en-GB-male"
+  | "en-US-female"
+  | "en-US-male"
+  | "en-AU-female"
+  | "en-AU-male"
+  | "en-IE"
+  | "en-SCOTTISH"
+  | "custom";
+
+export interface TTSVoiceProfile {
+  id: TTSPresetId;
+  label: string;
+  flag: string;
+  region: string;
+  gender: "Female" | "Male" | "Neutral";
+  description: string;
+  preferredKeywords: string[];
+  langMatch: string;
+  defaultPitch: number;
+}
+
 export interface Question {
   id: string;
   topicId: string;
